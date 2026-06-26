@@ -10,7 +10,11 @@ type Message = {
   content: string;
 };
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+// Defaults to same-origin ("") so production (one Vercel project routing
+// /api/* to the backend service) needs no env var at all. Local dev sets
+// NEXT_PUBLIC_API_URL=http://localhost:8000 in .env.local since the two
+// dev servers run on different ports.
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 // Real "Top questions" pulled verbatim from each RACV Help & Support page.
 const EXAMPLE_QUESTIONS = [
