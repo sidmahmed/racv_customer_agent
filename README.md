@@ -1,4 +1,4 @@
-# agent-scaffold
+# RACV Customer Service Agent
 
 A RACV customer-support chatbot proof-of-concept: a FastAPI backend running a
 LangChain tool-calling agent (OpenAI) that answers questions grounded in
