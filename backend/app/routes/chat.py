@@ -6,7 +6,7 @@ from fastapi.responses import StreamingResponse
 from app.agent import get_history, run_agent, stream_agent
 from app.models import ChatHistoryResponse, ChatRequest, ChatResponse
 
-router = APIRouter(prefix="/api/chat", tags=["chat"])
+router = APIRouter(prefix="/chat", tags=["chat"])
 
 
 @router.post("", response_model=ChatResponse)

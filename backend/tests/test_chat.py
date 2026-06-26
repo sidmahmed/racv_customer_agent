@@ -6,7 +6,7 @@ def test_stream_message(client, monkeypatch):
         chat, "stream_agent", lambda session_id, message: iter(["echo", ": ", message])
     )
 
-    res = client.post("/api/chat/stream", json={"session_id": "abc", "message": "hi"})
+    res = client.post("/chat/stream", json={"session_id": "abc", "message": "hi"})
 
     assert res.status_code == 200
     assert res.headers["content-type"].startswith("text/event-stream")
@@ -21,7 +21,7 @@ def test_stream_message(client, monkeypatch):
 def test_send_message(client, monkeypatch):
     monkeypatch.setattr(chat, "run_agent", lambda session_id, message: f"echo: {message}")
 
-    res = client.post("/api/chat", json={"session_id": "abc", "message": "hi"})
+    res = client.post("/chat", json={"session_id": "abc", "message": "hi"})
 
     assert res.status_code == 200
     assert res.json() == {"session_id": "abc", "response": "echo: hi"}
@@ -34,7 +34,7 @@ def test_get_history(client, monkeypatch):
         lambda session_id: [{"role": "human", "content": "hi"}],
     )
 
-    res = client.get("/api/chat/abc/history")
+    res = client.get("/chat/abc/history")
 
     assert res.status_code == 200
     assert res.json() == {

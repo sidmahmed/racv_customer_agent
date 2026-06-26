@@ -72,31 +72,4 @@ def search_help_center(query: str, category: str | None = None) -> str:
     )
 
 
-@tool
-def get_pricing(product_query: str, category: str | None = None) -> str:
-    """Look up illustrative/demo pricing for an RACV product or service.
-    Returns MOCK data for this proof-of-concept -- always tell the user the
-    figures are illustrative demo data, not live RACV pricing (RACV's real
-    pricing is quote-based and not published).
-
-    Args:
-        product_query: Product/plan name or keyword, e.g. "roadside basic"
-            or "car insurance excess".
-        category: Optional category filter, e.g. "car-insurance",
-            "home-insurance", "emergency-roadside-assistance".
-    """
-    supabase = get_supabase()
-    query = supabase.table("pricing").select("*").ilike("product_name", f"%{product_query}%")
-    if category:
-        query = query.eq("category", category)
-    rows = query.execute().data
-    if not rows:
-        return "No demo pricing data found for that product."
-    return "\n".join(
-        f"{r['product_name']} ({r['category']}): {r['price_description']} "
-        f"[illustrative demo data, not official RACV pricing]"
-        for r in rows
-    )
-
-
-TOOLS = [search_help_center, get_pricing]
+TOOLS = [search_help_center]

@@ -3,16 +3,16 @@
 A RACV customer-support chatbot: a FastAPI backend running a LangChain
 tool-calling agent (OpenAI) that answers questions grounded in RACV's Help &
 Support content via hybrid search (Supabase pgvector + full-text + RRF
-fusion), with a deterministic pricing lookup tool, chat history persisted in
-SQLite, and a Next.js/TypeScript frontend with streaming responses.
+fusion), chat history persisted in SQLite, and a Next.js/TypeScript frontend
+with streaming responses.
 
 ## Stack
 
 - Backend: FastAPI, Pydantic, LangChain (`langchain.agents.create_agent`,
   langgraph under the hood), OpenAI via `langchain-openai` (chat +
   embeddings), Supabase Postgres (pgvector + full-text search) for the
-  retrieval index and pricing table, SQLite (via `langgraph-checkpoint-sqlite`)
-  for agent/thread state.
+  retrieval index, SQLite (via `langgraph-checkpoint-sqlite`) for agent/thread
+  state.
 - Frontend: Next.js 16 (App Router), TypeScript, Tailwind CSS.
 - Package management: `uv` (backend), `npm` (frontend).
 
@@ -24,7 +24,7 @@ backend/
     main.py            # FastAPI app, CORS, route registration
     config.py           # pydantic-settings, reads .env
     agent.py             # builds the LangChain agent, RACV system prompt, sqlite-backed thread memory
-    tools.py             # search_help_center (hybrid RAG) + get_pricing (deterministic) tools
+    tools.py             # search_help_center (hybrid RAG) tool
     supabase_client.py   # supabase-py client singleton
     db.py                 # sqlite connection + langgraph SqliteSaver checkpointer (/tmp on Vercel)
     models.py             # pydantic request/response models
@@ -33,7 +33,7 @@ backend/
   scripts/
     ingest.py             # one-time/developer-run: fetch RACV pages, chunk, embed, upsert to Supabase
   supabase/
-    schema.sql            # documents/pricing tables + hybrid_search RPC -- run once via SQL editor
+    schema.sql            # documents table + hybrid_search RPC -- run once via SQL editor
   chat_history.db        # sqlite db (gitignored, created on first run)
 frontend/
   app/
@@ -61,8 +61,7 @@ Frontend (run from `frontend/`):
 ## One-time setup (before first run)
 
 1. Create a Supabase project, then run `backend/supabase/schema.sql` in its
-   SQL editor (creates `documents`/`pricing` tables, the `hybrid_search` RPC,
-   and seeds the mock pricing data).
+   SQL editor (creates the `documents` table and the `hybrid_search` RPC).
 2. Copy `backend/.env.example` to `backend/.env`, fill in `OPENAI_API_KEY`,
    `SUPABASE_URL`, `SUPABASE_KEY` (service role key).
 3. `cd backend && uv sync --group ingest && uv run python -m scripts.ingest`
@@ -102,13 +101,13 @@ Frontend (run from `frontend/`):
   frontend, persisted in `localStorage`) and stored via langgraph's
   `SqliteSaver` checkpointer in `backend/chat_history.db` (or `/tmp` when
   deployed to Vercel).
-- The agent's two tools (`backend/app/tools.py`) replace the scaffold's
-  original demo tool: `search_help_center` (hybrid semantic+keyword search
-  over the ingested RACV pages, with an optional `category` filter and
-  citations) and `get_pricing` (deterministic lexical lookup against a
-  clearly-labeled mock pricing dataset -- RACV's real pricing is quote-based
-  and not published on the source pages). To add another tool, follow the
-  same `@tool`-decorated pattern and include it in `TOOLS`.
+- The agent's tool (`backend/app/tools.py`) replaces the scaffold's original
+  demo tool: `search_help_center` (hybrid semantic+keyword search over the
+  ingested RACV pages, with an optional `category` filter and citations). A
+  pricing lookup tool was scoped out for now -- the agent is told it has no
+  pricing access and to direct members to contact RACV for a quote. To add
+  another tool, follow the same `@tool`-decorated pattern and include it in
+  `TOOLS`.
 - `frontend/AGENTS.md` flags that this Next.js version may differ from
   training data on routing/caching APIs — check `node_modules/next/dist/docs/`
   before relying on prior knowledge of Next.js conventions.

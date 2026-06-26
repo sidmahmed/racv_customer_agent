@@ -3,16 +3,15 @@
 A RACV customer-support chatbot proof-of-concept: a FastAPI backend running a
 LangChain tool-calling agent (OpenAI) that answers questions grounded in
 RACV's official Help & Support content via hybrid (semantic + keyword)
-search, plus a deterministic pricing lookup tool, with a Next.js/TypeScript
-frontend with streaming responses.
+search, with a Next.js/TypeScript frontend with streaming responses.
 
 ## Stack
 
 - **Backend**: FastAPI, Pydantic, LangChain (`langchain.agents.create_agent`,
   LangGraph under the hood), OpenAI via `langchain-openai` (chat +
   embeddings), Supabase Postgres (pgvector + full-text search, fused via a
-  documented RRF SQL function) for the retrieval index and pricing table,
-  SQLite for agent/thread memory (`langgraph-checkpoint-sqlite`).
+  documented RRF SQL function) for the retrieval index, SQLite for
+  agent/thread memory (`langgraph-checkpoint-sqlite`).
 - **Frontend**: Next.js 16 (App Router), TypeScript, Tailwind CSS,
   `react-markdown` for rendering assistant responses (including citation
   links).
@@ -24,8 +23,7 @@ frontend with streaming responses.
 
 Create a [Supabase](https://supabase.com) project, then run
 `backend/supabase/schema.sql` in its SQL editor. This creates the
-`documents`/`pricing` tables, the `hybrid_search` RPC function, and seeds the
-mock pricing dataset.
+`documents` table and the `hybrid_search` RPC function.
 
 ### 2. Backend
 
@@ -59,7 +57,7 @@ backend/
     main.py              # FastAPI app, CORS, route registration
     config.py             # pydantic-settings, reads .env
     agent.py               # builds the LangChain agent, RACV system prompt, sqlite-backed thread memory
-    tools.py               # search_help_center (hybrid RAG) + get_pricing (deterministic) tools
+    tools.py               # search_help_center (hybrid RAG) tool
     supabase_client.py     # supabase-py client singleton
     db.py                   # sqlite connection + langgraph SqliteSaver checkpointer (/tmp on Vercel)
     models.py               # pydantic request/response models
@@ -68,7 +66,7 @@ backend/
   scripts/
     ingest.py               # one-time/developer-run: fetch RACV pages, chunk, embed, upsert to Supabase
   supabase/
-    schema.sql               # documents/pricing tables + hybrid_search RPC -- run once via SQL editor
+    schema.sql               # documents table + hybrid_search RPC -- run once via SQL editor
   tests/                     # pytest
 frontend/
   app/
